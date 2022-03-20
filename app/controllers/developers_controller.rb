@@ -1,5 +1,5 @@
 class DevelopersController < ApplicationController
-  before_action :set_developer, only: [:show, :update, :destroy]
+  # before_action :set_developer, only: [:show, :update, :destroy]
 
   # GET /developers
   def index
@@ -36,6 +36,20 @@ class DevelopersController < ApplicationController
   # DELETE /developers/1
   def destroy
     @developer.destroy
+  end
+
+  def search
+    if params[:username].present?
+      @information = Developer.get_information(params[:username])
+
+      if @information.present?
+       render json: @information
+      else
+        redirect_to developers_path
+      end
+    else
+      redirect_to developers_path
+    end
   end
 
   private

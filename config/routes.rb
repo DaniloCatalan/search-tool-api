@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
-  resources :developers
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  resources :developers do
+    get 'search/:username', action: 'search', on: :collection
+  end
 end
