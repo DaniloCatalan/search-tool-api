@@ -2,11 +2,13 @@ class Developer < ApplicationRecord
   require 'net/http'
   @base_api ='https://api.github.com'
 
+  has_many :languages, dependent: :destroy
+  validates :username, presence: true, uniqueness: { case_sensitive: false}
+
   def self.get_proefiency(user_name)
     proefiency_languages = []
 
     user_repos = get_user_repositories(user_name)
-    total = user_repos.count
     
     languages = user_repos.map { |repo| repo['language'] }.reject(&:blank?)
     grouped_by_name = languages.group_by {|name| name&.split(" ").first.capitalize}
@@ -15,7 +17,7 @@ class Developer < ApplicationRecord
     grouped.each do |language|
       lang = {
         name: language[0].to_s,
-        proefiency: ((language[1].to_f / total) * 100).to_f
+        proefiency: ((language[1].to_f / user_repos.count) * 100).to_f
       }
       proefiency_languages << lang
     end
@@ -32,9 +34,8 @@ class Developer < ApplicationRecord
     get_result(url) 
   end
 
-  def self.get_by_language(language)
-    url = URI("#{@base_api}/search/users?q=language:#{language}")
-    get_result(url)
+  def self.get_developers_by_language(language)
+    Developer.joins(:languages).where('languages.name like ?', "%#{language}%")
   end
 
   def self.get_result(url)
@@ -67,4 +68,5 @@ class Developer < ApplicationRecord
       }
     end
   end
+
 end

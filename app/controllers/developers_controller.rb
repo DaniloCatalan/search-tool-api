@@ -1,5 +1,4 @@
 class DevelopersController < ApplicationController
-  # before_action :set_developer, only: [:show, :update, :destroy]
 
   # GET /developers
   def index
@@ -8,58 +7,46 @@ class DevelopersController < ApplicationController
     render json: @developers
   end
 
-  # GET /developers/1
-  def show
-    render json: @developer
-  end
-
   # POST /developers
   def create
     @developer = Developer.new(developer_params)
 
     if @developer.save
-      render json: @developer, status: :created, location: @developer
+      @information = show_user
+      save_languages(params[:username])
+      render json: @information, status: 200
     else
       render json: @developer.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /developers/1
-  def update
-    if @developer.update(developer_params)
-      render json: @developer
+  def show_user
+    if params[:username].present?
+      @information = Developer.get_information(params[:username])
     else
-      render json: @developer.errors, status: :unprocessable_entity
+      redirect_to developers_path
     end
-  end
-
-  # DELETE /developers/1
-  def destroy
-    @developer.destroy
   end
 
   def search
-    if params[:username].present?
-      @information = Developer.get_information(params[:username])
-
-      if @information.present?
-       render json: @information
-      else
-        redirect_to developers_path
-      end
+    if params[:language].present?
+      @developers = Developer.get_developers_by_language(params[:language])
+      render json: @developers
     else
       redirect_to developers_path
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_developer
-      @developer = Developer.find(params[:id])
-    end
-
     # Only allow a list of trusted parameters through.
     def developer_params
-      params.require(:developer).permit(:username)
+      params.require(:developer).permit(:username,:language)
     end
+
+    def save_languages(user_name)
+      developer = Developer.find_by(username: user_name)
+      @information[:languages].each do |language|
+        Language.create(name: language[:name], percent: language[:proefiency], developer_id: developer.id)
+      end
+  end
 end

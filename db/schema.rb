@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_20_222325) do
+ActiveRecord::Schema.define(version: 2022_03_21_000512) do
 
   create_table "developers", force: :cascade do |t|
     t.string "username"
@@ -18,4 +18,14 @@ ActiveRecord::Schema.define(version: 2022_03_20_222325) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "languages", force: :cascade do |t|
+    t.string "name"
+    t.decimal "percent"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "developer_id", null: false
+    t.index ["developer_id"], name: "index_languages_on_developer_id"
+  end
+
+  add_foreign_key "languages", "developers"
 end
