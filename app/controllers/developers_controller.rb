@@ -1,6 +1,7 @@
 class DevelopersController < ApplicationController
 
   # GET /developers
+  # keep the method in future cases and allow to review the existing
   def index
     @developers = Developer.all
 
@@ -8,12 +9,12 @@ class DevelopersController < ApplicationController
   end
 
   # POST /developers
+  # register a developer with the information obtained from your account
   def create
     @developer = Developer.new(developer_params)
-
+    set_developer
     if @developer.save
-      @information = show_user
-      save_languages(params[:username])
+      save_languages
       render json: @information, status: 200
     else
       render json: @developer.errors, status: :unprocessable_entity
@@ -28,6 +29,7 @@ class DevelopersController < ApplicationController
     end
   end
 
+  # returns the developers that meet the condition of the requested language
   def search
     if params[:language].present?
       @developers = Developer.get_developers_by_language(params[:language])
@@ -38,15 +40,27 @@ class DevelopersController < ApplicationController
   end
 
   private
-    # Only allow a list of trusted parameters through.
-    def developer_params
-      params.require(:developer).permit(:username,:language)
-    end
 
-    def save_languages(user_name)
-      developer = Developer.find_by(username: user_name)
-      @information[:languages].each do |language|
-        Language.create(name: language[:name], percent: language[:proefiency], developer_id: developer.id)
-      end
+  # Only allow a list of trusted parameters through.
+  def developer_params
+    params.require(:developer).permit(:username, :language)
+  end
+
+  # set values obtained from the GitHub api
+  # if the user does not exist I stop the process
+  def set_developer
+    @information = show_user
+    raise 'Not Found' if @information.nil?
+
+    @developer.name = @information[:name]
+    @developer.repositories = @information[:repositories]
+    @developer.location = @information[:location]
+  end
+
+  # iterate through the existing languages and save
+  def save_languages
+    @information[:languages].each do |language|
+      Language.create(name: language[:name], percent: language[:proefiency], developer_id: @developer.id)
+    end
   end
 end

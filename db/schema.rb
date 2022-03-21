@@ -10,12 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_21_000512) do
+ActiveRecord::Schema.define(version: 2022_03_21_092926) do
 
   create_table "developers", force: :cascade do |t|
     t.string "username"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "name"
+    t.decimal "repositories"
+    t.string "location"
   end
 
   create_table "languages", force: :cascade do |t|
